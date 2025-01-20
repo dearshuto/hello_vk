@@ -1,0 +1,8 @@
+[package]
+name = "hello_shader_object"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# ash = { workspace = true }
+ash.workspace = true
