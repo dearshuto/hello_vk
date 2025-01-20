@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = [ "hello_mesh_shader","hello_shader_object"]
+members = [ "hello_shader_object"]
 
 [workspace.dependencies]
 ash = { version = "0.38", features = [ "linked" ] }
