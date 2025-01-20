@@ -18,6 +18,24 @@ fn main() {
     .unwrap();
 
     let physical_device = unsafe { instance.enumerate_physical_devices() }.unwrap()[0];
+    let extensions =
+        unsafe { instance.enumerate_device_extension_properties(physical_device) }.unwrap();
+    let is_contains = extensions.iter().any(|x| {
+        let Ok(name) = x.extension_name_as_c_str() else {
+            return false;
+        };
+
+        if name.to_str().unwrap() != "VK_EXT_shader_object" {
+            return false;
+        }
+
+        true
+    });
+    if !is_contains {
+        println!("required extension VK_EXT_shader_object not supported");
+        return;
+    }
+
     let device = {
         let mut features =
             ash::vk::PhysicalDeviceShaderObjectFeaturesEXT::default().shader_object(true);
