@@ -12,7 +12,10 @@ fn main() {
         } else {
             ash::vk::InstanceCreateFlags::default()
         };
-        let layer_names = [c"VK_LAYER_KHRONOS_validation".as_ptr()];
+        let layer_names = [
+            c"VK_LAYER_KHRONOS_validation".as_ptr(),
+            c"VK_LAYER_KHRONOS_shader_object".as_ptr(),
+        ];
         let application_info =
             ash::vk::ApplicationInfo::default().api_version(ash::vk::API_VERSION_1_3);
         let create_info = ash::vk::InstanceCreateInfo::default()
@@ -47,7 +50,12 @@ fn main() {
     let device = {
         let mut features =
             ash::vk::PhysicalDeviceShaderObjectFeaturesEXT::default().shader_object(true);
-        let enabled_extension_names = [ash::vk::EXT_SHADER_OBJECT_NAME.as_ptr()];
+        let enabled_extension_names = [
+            ash::vk::EXT_SHADER_OBJECT_NAME.as_ptr(),
+            ash::vk::KHR_DYNAMIC_RENDERING_NAME.as_ptr(),
+            #[cfg(any(target_os = "macos", target_os = "ios"))]
+            ash::khr::portability_subset::NAME.as_ptr(),
+        ];
         // let enabled_extension_names = [];
         let properties = [1.0];
         let queue_create_infos = [ash::vk::DeviceQueueCreateInfo::default()
