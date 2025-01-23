@@ -6,3 +6,7 @@ edition = "2021"
 [dependencies]
 # ash = { workspace = true }
 ash.workspace = true
+winit = "0.30.0"
+
+[build-dependencies]
+naga = { version = "23.1.0", features = ["glsl-in", "spv-out"] }
