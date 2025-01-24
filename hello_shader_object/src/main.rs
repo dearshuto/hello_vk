@@ -158,6 +158,10 @@ impl App {
 
             // ラスタライザ
             device.cmd_set_rasterizer_discard_enable(command_buffer, false);
+            shader_object_device
+                .cmd_set_rasterization_samples(command_buffer, ash::vk::SampleCountFlags::TYPE_1);
+            shader_object_device.cmd_set_alpha_to_coverage_enable(command_buffer, false);
+            shader_object_device.cmd_set_polygon_mode(command_buffer, ash::vk::PolygonMode::FILL);
             device.cmd_set_primitive_restart_enable(command_buffer, true);
             device.cmd_set_primitive_topology(
                 command_buffer,
@@ -167,7 +171,9 @@ impl App {
 
             // 深度テスト
             device.cmd_set_depth_test_enable(command_buffer, false);
+            device.cmd_set_depth_write_enable(command_buffer, false);
             device.cmd_set_stencil_test_enable(command_buffer, false);
+            device.cmd_set_depth_bias_enable(command_buffer, false);
 
             // ブレンドステート
             shader_object_device.cmd_set_color_write_mask(
@@ -269,8 +275,8 @@ impl ApplicationHandler for App {
                 .to_vec();
             extension_names.append(&mut vec![
                 ash::ext::debug_utils::NAME.as_ptr(),
-                //  ash::khr::get_physical_device_properties2::NAME.as_ptr(),
-                //  ash::khr::portability_enumeration::NAME.as_ptr(),
+                ash::khr::get_physical_device_properties2::NAME.as_ptr(),
+                ash::khr::portability_enumeration::NAME.as_ptr(),
             ]);
 
             let create_flags = if cfg!(any(target_os = "macos", target_os = "ios")) {
