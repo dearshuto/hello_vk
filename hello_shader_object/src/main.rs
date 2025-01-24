@@ -157,7 +157,7 @@ impl App {
             );
 
             // ラスタライザ
-            device.cmd_set_rasterizer_discard_enable(command_buffer, true);
+            device.cmd_set_rasterizer_discard_enable(command_buffer, false);
             device.cmd_set_primitive_restart_enable(command_buffer, true);
             device.cmd_set_primitive_topology(
                 command_buffer,
@@ -269,8 +269,8 @@ impl ApplicationHandler for App {
                 .to_vec();
             extension_names.append(&mut vec![
                 ash::ext::debug_utils::NAME.as_ptr(),
-                ash::khr::get_physical_device_properties2::NAME.as_ptr(),
-                ash::khr::portability_enumeration::NAME.as_ptr(),
+                //  ash::khr::get_physical_device_properties2::NAME.as_ptr(),
+                //  ash::khr::portability_enumeration::NAME.as_ptr(),
             ]);
 
             let create_flags = if cfg!(any(target_os = "macos", target_os = "ios")) {
