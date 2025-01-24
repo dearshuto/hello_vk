@@ -113,7 +113,7 @@ impl App {
                 &ash::vk::RenderingInfo::default()
                     .render_area(
                         ash::vk::Rect2D::default()
-                            .extent(ash::vk::Extent2D::default().width(640).height(480)),
+                            .extent(ash::vk::Extent2D::default().width(1280).height(960)),
                     )
                     .layer_count(1)
                     .color_attachments(&[ash::vk::RenderingAttachmentInfo::default()
