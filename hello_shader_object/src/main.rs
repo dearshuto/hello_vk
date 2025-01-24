@@ -165,6 +165,13 @@ impl App {
             );
             device.cmd_set_cull_mode(command_buffer, ash::vk::CullModeFlags::NONE);
 
+            // ブレンドステート
+            shader_object_device.cmd_set_sample_mask(
+                command_buffer,
+                ash::vk::SampleCountFlags::TYPE_1,
+                &[0xFF],
+            );
+
             // 頂点ステート
             shader_object_device.cmd_set_vertex_input(command_buffer, &[], &[]);
         }
