@@ -170,6 +170,12 @@ impl App {
             device.cmd_set_stencil_test_enable(command_buffer, false);
 
             // ブレンドステート
+            shader_object_device.cmd_set_color_write_mask(
+                command_buffer,
+                0,
+                &[ash::vk::ColorComponentFlags::RGBA],
+            );
+            shader_object_device.cmd_set_color_blend_enable(command_buffer, 0, &[0]);
             shader_object_device.cmd_set_sample_mask(
                 command_buffer,
                 ash::vk::SampleCountFlags::TYPE_1,
