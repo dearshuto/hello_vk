@@ -98,7 +98,7 @@ impl App {
                     .src_access_mask(ash::vk::AccessFlags::empty())
                     .dst_access_mask(ash::vk::AccessFlags::COLOR_ATTACHMENT_WRITE)
                     .old_layout(ash::vk::ImageLayout::UNDEFINED)
-                    .new_layout(ash::vk::ImageLayout::COLOR_ATTACHMENT_OPTIMAL)
+                    .new_layout(ash::vk::ImageLayout::GENERAL)
                     .subresource_range(
                         ash::vk::ImageSubresourceRange::default()
                             .aspect_mask(ash::vk::ImageAspectFlags::COLOR)
@@ -107,6 +107,23 @@ impl App {
                             .base_array_layer(0)
                             .layer_count(1),
                     )],
+            )
+        }
+
+        unsafe {
+            device.cmd_clear_color_image(
+                command_buffer,
+                swapchain_images[frame_index as usize],
+                ash::vk::ImageLayout::GENERAL,
+                &ash::vk::ClearColorValue {
+                    float32: [1.0, 1.0, 1.0, 1.0],
+                },
+                &[ash::vk::ImageSubresourceRange::default()
+                    .aspect_mask(ash::vk::ImageAspectFlags::COLOR)
+                    .base_mip_level(0)
+                    .level_count(1)
+                    .base_array_layer(0)
+                    .layer_count(1)],
             )
         }
 
@@ -120,9 +137,9 @@ impl App {
                     )
                     .layer_count(1)
                     .color_attachments(&[ash::vk::RenderingAttachmentInfo::default()
-                        .load_op(ash::vk::AttachmentLoadOp::CLEAR)
+                        .load_op(ash::vk::AttachmentLoadOp::LOAD)
                         .store_op(ash::vk::AttachmentStoreOp::STORE)
-                        .image_layout(ash::vk::ImageLayout::COLOR_ATTACHMENT_OPTIMAL)
+                        .image_layout(ash::vk::ImageLayout::GENERAL)
                         .clear_value(ash::vk::ClearValue {
                             color: ash::vk::ClearColorValue {
                                 float32: [1.0, 1.0, 1.0, 1.0],
@@ -210,7 +227,8 @@ impl App {
                     .image(swapchain_images[frame_index as usize])
                     .src_access_mask(ash::vk::AccessFlags::COLOR_ATTACHMENT_WRITE)
                     .dst_access_mask(ash::vk::AccessFlags::empty())
-                    .old_layout(ash::vk::ImageLayout::COLOR_ATTACHMENT_OPTIMAL)
+                    // .old_layout(ash::vk::ImageLayout::COLOR_ATTACHMENT_OPTIMAL)
+                    .old_layout(ash::vk::ImageLayout::GENERAL)
                     .new_layout(ash::vk::ImageLayout::PRESENT_SRC_KHR)
                     .subresource_range(
                         ash::vk::ImageSubresourceRange::default()
@@ -432,7 +450,9 @@ impl ApplicationHandler for App {
             .image_color_space(surface_format.color_space)
             .image_format(surface_format.format)
             .image_extent(surface_resolution)
-            .image_usage(ash::vk::ImageUsageFlags::COLOR_ATTACHMENT)
+            .image_usage(
+                ash::vk::ImageUsageFlags::COLOR_ATTACHMENT | ash::vk::ImageUsageFlags::TRANSFER_DST,
+            )
             .image_sharing_mode(ash::vk::SharingMode::EXCLUSIVE)
             .pre_transform(ash::vk::SurfaceTransformFlagsKHR::IDENTITY) // 回転不要
             .composite_alpha(ash::vk::CompositeAlphaFlagsKHR::OPAQUE)
