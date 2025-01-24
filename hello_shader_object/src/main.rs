@@ -143,6 +143,36 @@ impl App {
             );
         }
 
+        // ステートたち
+        unsafe {
+            // ビューポート
+            device.cmd_set_viewport_with_count(
+                command_buffer,
+                &[ash::vk::Viewport::default().width(1280.0).height(960.0)],
+            );
+            device.cmd_set_scissor_with_count(
+                command_buffer,
+                &[ash::vk::Rect2D::default()
+                    .extent(ash::vk::Extent2D::default().width(1280).height(960))],
+            );
+
+            // ラスタライザ
+            device.cmd_set_rasterizer_discard_enable(command_buffer, true);
+            device.cmd_set_primitive_restart_enable(command_buffer, true);
+            device.cmd_set_primitive_topology(
+                command_buffer,
+                ash::vk::PrimitiveTopology::TRIANGLE_LIST,
+            );
+            device.cmd_set_cull_mode(command_buffer, ash::vk::CullModeFlags::NONE);
+
+            // 頂点ステート
+            shader_object_device.cmd_set_vertex_input(command_buffer, &[], &[]);
+        }
+
+        unsafe {
+            device.cmd_draw(command_buffer, 3, 1, 0, 0);
+        }
+
         unsafe { device.cmd_end_rendering(command_buffer) };
 
         unsafe {
