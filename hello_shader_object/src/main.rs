@@ -1,5 +1,6 @@
 use std::borrow::Cow;
 
+use include_bytes_aligned::include_bytes_aligned;
 use winit::{
     application::ApplicationHandler,
     raw_window_handle::{HasDisplayHandle, HasWindowHandle},
@@ -28,8 +29,8 @@ struct Instance {
     acquire_next_image_semaphore: ash::vk::Semaphore,
     command_semaphore: ash::vk::Semaphore,
     render_pass: ash::vk::RenderPass,
-    // shader_object_device: ash::ext::shader_object::Device,
-    // shader_objects: [ash::vk::ShaderEXT; 2],
+    shader_object_device: ash::ext::shader_object::Device,
+    shader_objects: [ash::vk::ShaderEXT; 2],
 }
 
 struct App {
@@ -65,6 +66,8 @@ impl App {
         let command_buffer = instance.command_buffer;
         let acquire_next_image_semaphore = instance.acquire_next_image_semaphore;
         let render_command_semaphore = instance.command_semaphore;
+        let shader_object_device = &instance.shader_object_device;
+        let shader_objects = &instance.shader_objects;
 
         unsafe { device.queue_wait_idle(queue) }.unwrap();
 
@@ -126,6 +129,17 @@ impl App {
                             },
                         })
                         .image_view(present_image_views[frame_index as usize])]),
+            );
+        }
+
+        unsafe {
+            shader_object_device.cmd_bind_shaders(
+                command_buffer,
+                &[
+                    ash::vk::ShaderStageFlags::VERTEX,
+                    ash::vk::ShaderStageFlags::FRAGMENT,
+                ],
+                &[shader_objects[0], shader_objects[1]],
             );
         }
 
@@ -438,16 +452,30 @@ impl ApplicationHandler for App {
             unsafe { device.create_render_pass(&create_info, None) }.unwrap()
         };
 
-        // let shader_object_device = ash::ext::shader_object::Device::new(&instance, &device);
+        let shader_object_device = ash::ext::shader_object::Device::new(&instance, &device);
 
-        // let shader_create_info = [
-        //     ash::vk::ShaderCreateInfoEXT::default().flags(ash::vk::ShaderCreateFlagsEXT::LINK_STAGE)
-        // ];
-        // let shader_object = unsafe {
-        //     shader_object_device
-        //         .create_shaders(&shader_create_info, None)
-        //         .unwrap()
-        // };
+        let shader_create_info = [
+            ash::vk::ShaderCreateInfoEXT::default()
+                // .flags(ash::vk::ShaderCreateFlagsEXT::LINK_STAGE)
+                .stage(ash::vk::ShaderStageFlags::VERTEX)
+                .next_stage(ash::vk::ShaderStageFlags::FRAGMENT)
+                .code_type(ash::vk::ShaderCodeTypeEXT::SPIRV)
+                .code(include_bytes_aligned!(4, "../res/triangle.vs.spv"))
+                .name(c"main"),
+            ash::vk::ShaderCreateInfoEXT::default()
+                //.flags(ash::vk::ShaderCreateFlagsEXT::LINK_STAGE)
+                .stage(ash::vk::ShaderStageFlags::FRAGMENT)
+                .next_stage(ash::vk::ShaderStageFlags::empty())
+                .code_type(ash::vk::ShaderCodeTypeEXT::SPIRV)
+                .code(include_bytes_aligned!(4, "../res/triangle.fs.spv"))
+                .name(c"main"),
+        ];
+
+        let shader_object = unsafe {
+            shader_object_device
+                .create_shaders(&shader_create_info, None)
+                .unwrap()
+        };
 
         let (acquire_next_image_semaphore, command_semaphore) = {
             let create_info = ash::vk::SemaphoreCreateInfo::default();
@@ -473,6 +501,8 @@ impl ApplicationHandler for App {
             render_pass,
             acquire_next_image_semaphore,
             command_semaphore,
+            shader_object_device,
+            shader_objects: [shader_object[0], shader_object[1]],
         });
     }
 
@@ -511,6 +541,16 @@ impl Drop for App {
             instance
                 .device
                 .destroy_semaphore(instance.acquire_next_image_semaphore, None);
+        }
+
+        // シェーダーオブジェクト
+        unsafe {
+            instance
+                .shader_object_device
+                .destroy_shader(instance.shader_objects[0], None);
+            instance
+                .shader_object_device
+                .destroy_shader(instance.shader_objects[1], None);
         }
 
         // レンダーパス
