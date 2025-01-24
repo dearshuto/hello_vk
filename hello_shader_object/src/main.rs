@@ -165,11 +165,15 @@ impl App {
             );
             device.cmd_set_cull_mode(command_buffer, ash::vk::CullModeFlags::NONE);
 
+            // 深度テスト
+            device.cmd_set_depth_test_enable(command_buffer, false);
+            device.cmd_set_stencil_test_enable(command_buffer, false);
+
             // ブレンドステート
             shader_object_device.cmd_set_sample_mask(
                 command_buffer,
                 ash::vk::SampleCountFlags::TYPE_1,
-                &[0xFF],
+                &[0xFFFFFFFF],
             );
 
             // 頂点ステート
